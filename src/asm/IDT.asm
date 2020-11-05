@@ -173,3 +173,15 @@ lidt[idtDescriptor]
 sti
 ret
 GLOBAL LoadIDT
+
+BadidtDescriptor:
+dw 0
+dq 0xffffffffffffffff
+
+tripleFault:
+cli
+lidt [BadidtDescriptor]
+sti
+int 0x60 ; a random interrupt
+ret
+GLOBAL tripleFault
