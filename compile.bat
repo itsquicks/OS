@@ -8,7 +8,7 @@ make -f "Makefile"
 
 copy /b bootloader.bin+Kernel.bin os.bin
 
-dd if=/dev/zero of=os.img bs=512 count=100
+dd if=/dev/zero of=os.img bs=512 count=128
 dd if=os.bin of=os.img conv=notrunc
 
 del os.bin
