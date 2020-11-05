@@ -89,10 +89,7 @@ extern uint32 fatStart;
 extern uint32 dataStart;
 extern uint32 rootStart;
 extern uint32 dirStart;
-
 extern char* path;
-
-extern DirectoryEntry** dirEntires;
 
 MBR* ReadMBR();
 BPB* ReadBPB(uint32 partitionOffset);
@@ -105,13 +102,12 @@ DirectoryEntry* DirectoryFromName(char* name);
 
 uint32 GetFreeCluster();
 
+void ChangeDirectory(DirectoryEntry* dir);
+void DeleteDirectory(DirectoryEntry* dir);
+void DeleteFile(DirectoryEntry* file);
 DirectoryEntry** NewFile(char* name, uint8 attributes);
 
-void DeleteFile(DirectoryEntry* file);
-
-void ChangeDirectory(DirectoryEntry* dir);
 void PrintDirectoryContent();
 void PrintFileContent(DirectoryEntry* file);
-
 void PrintMBR(MBR* mbr);
 void PrintBPB(BPB* bpb);

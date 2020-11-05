@@ -8,10 +8,7 @@ uint32 fatStart;
 uint32 dataStart;
 uint32 rootStart;
 uint32 dirStart;
-
 char* path;
-
-DirectoryEntry** dirEntries;
 
 MBR* ReadMBR()
 {
@@ -31,7 +28,7 @@ BPB* ReadBPB(uint32 partitionOffset)
 
 void InitializeFilesystem()
 {
-    hd = InitializeATA(0x1f0, false);
+    hd = InitializeATA(0x1f0,false);
     //mbr = ReadMBR();
     //bpb = ReadBPB(mbr->primaryPartition[0].startLBA);
     bpb = ReadBPB(0);
@@ -41,7 +38,7 @@ void InitializeFilesystem()
     rootStart = dataStart + bpb->sectorsPerCluster * (bpb->rootCluster - 2);
     dirStart = rootStart;
 
-    path = (char*)calloc(65);
+    path = (char*)calloc(70);
     stradd(path, "Root");
 }
 
@@ -213,44 +210,29 @@ uint32 GetFreeCluster()
     return ret;
 }
 
-DirectoryEntry** NewFile(char* name, uint8 attributes)
+void ChangeDirectory(DirectoryEntry* dir)
 {
+    uint32 fileCluster = ((uint32)dir->firstClusterHigh << 16) | dir->firstClusterLow;
+    uint32 fileSector = dataStart + bpb->sectorsPerCluster * (fileCluster - 2);
 
+    if (fileSector < rootStart)
+        fileSector = rootStart;
+
+    dirStart = fileSector;
 }
 
-void DeleteFile(DirectoryEntry* file)
+void DeleteDirectory(DirectoryEntry* dir)
 {
-    /*uint32 firstFileCluster = ((uint32)file->firstClusterHigh << 16) | file->firstClusterLow;
-    DirectoryEntry dir = *file;
-    uint32 nextFileCluster = firstFileCluster;
-    uint8 fatBuffer[513];
 
-    while (1)
-    {
-        uint32 fatSectorForCurrentCluster = nextFileCluster / (512 / sizeof(uint32));
-        ATA_Read(hd, fatStart + fatSectorForCurrentCluster, fatBuffer, 512);
-        uint32 fatOffsetInSectorForCurrentCluster = nextFileCluster % (512 / sizeof(uint32));
-        nextFileCluster = ((uint32*)&fatBuffer)[fatOffsetInSectorForCurrentCluster] & 0x0fffffff;
-
-        if (nextFileCluster == 0x00000000)
-            break;
-
-        ((uint32*)&fatBuffer)[fatOffsetInSectorForCurrentCluster] = 0x00000000;
-
-        ATA_Write(hd, fatStart + fatSectorForCurrentCluster, fatBuffer, 512);
-        ATA_Flush(hd);
-        ATA_Write(hd, fatStart + fatSectorForCurrentCluster + bpb->tableSize, fatBuffer, 512);
-        ATA_Flush(hd);
-
-        if (nextFileCluster == 0x0fffffff)
-            break;
-    }
+    uint32 lastStart = dirStart;
+    DirectoryEntry savedDir = *dir;
+    ChangeDirectory(dir);
 
     bool end = false;
 
     DirectoryEntry dirent[16 * bpb->sectorsPerCluster];
     uint32 dirSector = dirStart;
-    uint32 fatSectorForCurrentCluster;
+    uint8 fatBuffer[513];
 
     while (1)
     {
@@ -261,6 +243,72 @@ void DeleteFile(DirectoryEntry* file)
 
         for (uint8 i = 0; i < 16 * bpb->sectorsPerCluster; i++)
         {
+
+            if (dirent[i].name[0] == 0x00)
+            {
+                end = true;
+                break;
+            }
+
+            if (dirent[i].name[0] == 0xE5)
+                continue;
+
+            if (dirent[i].name[0] == 0x2E)
+                continue;
+
+            if ((dirent[i].attributes & 0x0F) == 0x0F)
+                continue;
+
+            if ((dirent[i].attributes & 0x08) == 0x08)
+                continue;
+
+            if ((dirent[i].attributes & 0x10) == 0x10)
+            {
+                DeleteDirectory((DirectoryEntry*)&dirent[i]);
+            }
+            else
+            {
+                DeleteFile((DirectoryEntry*)&dirent[i]);
+            }
+        }
+
+        if (end)
+            break;
+        else
+        {
+            uint32 dirCluster = (dirSector - dataStart) / bpb->sectorsPerCluster + 2;
+            uint32 fatSectorForCurrentCluster = dirCluster / (512 / sizeof(uint32));
+            ATA_Read(hd, fatStart + fatSectorForCurrentCluster, fatBuffer, 512);
+            uint32 fatOffsetInSectorForCurrentCluster = dirCluster % (512 / sizeof(uint32));
+            dirCluster = ((uint32*)&fatBuffer)[fatOffsetInSectorForCurrentCluster] & 0x0fffffff;
+            dirSector = dataStart + bpb->sectorsPerCluster * (dirCluster - 2);
+        }
+    }
+
+    dirStart = lastStart;
+    DeleteFile((DirectoryEntry*)&savedDir);
+}
+
+void DeleteFile(DirectoryEntry* file)
+{
+    DirectoryEntry savedFile = *file;
+
+    bool end = false;
+
+    DirectoryEntry dirent[16 * bpb->sectorsPerCluster];
+    uint32 dirSector = dirStart;
+    uint8 fatBuffer[513];
+
+    while (1)
+    {
+        for (uint8 i = 0; i < bpb->sectorsPerCluster; i++)
+        {
+            ATA_Read(hd, dirSector + i, (uint8*)(&dirent[16 * i]), 16 * sizeof(DirectoryEntry));
+        }
+
+        for (uint8 i = 0; i < 16 * bpb->sectorsPerCluster; i++)
+        {
+
             if (dirent[i].name[0] == 0x00)
             {
                 end = true;
@@ -276,19 +324,15 @@ void DeleteFile(DirectoryEntry* file)
             if ((dirent[i].attributes & 0x08) == 0x08)
                 continue;
 
-            Print((char*)dir.name);
-            Print("\r\n");
-            Print((char*)dirent[i].name);
-            Print("\r\n");
-            if (dirent[i].name == dir.name)
+            if (strcmp((char*)dirent[i].name, (char*)savedFile.name, 11))
             {
-                Print("A");
                 end = true;
                 dirent[i].name[0] = 0xE5;
                 uint8 j = 1;
+
                 while (dirent[i - j].attributes == 0x0f)
                 {
-                    dirent[i - j].name[0] = 0xE5; 
+                    dirent[i - j].name[0] = 0xE5;
                     j++;
                 }
 
@@ -313,18 +357,36 @@ void DeleteFile(DirectoryEntry* file)
             dirCluster = ((uint32*)&fatBuffer)[fatOffsetInSectorForCurrentCluster] & 0x0fffffff;
             dirSector = dataStart + bpb->sectorsPerCluster * (dirCluster - 2);
         }
-    }*/
+    }
+
+    uint32 firstFileCluster = ((uint32)savedFile.firstClusterHigh << 16) | savedFile.firstClusterLow;
+    uint32 nextFileCluster = firstFileCluster;
+
+    while (1)
+    {
+        uint32 fatSectorForCurrentCluster = nextFileCluster / (512 / sizeof(uint32));
+        ATA_Read(hd, fatStart + fatSectorForCurrentCluster, fatBuffer, 512);
+        uint32 fatOffsetInSectorForCurrentCluster = nextFileCluster % (512 / sizeof(uint32));
+        nextFileCluster = ((uint32*)&fatBuffer)[fatOffsetInSectorForCurrentCluster] & 0x0fffffff;
+
+        if (nextFileCluster == 0x00000000)
+            break;
+
+        ((uint32*)&fatBuffer)[fatOffsetInSectorForCurrentCluster] = 0x00000000;
+
+        ATA_Write(hd, fatStart + fatSectorForCurrentCluster, fatBuffer, 512);
+        ATA_Flush(hd);
+        ATA_Write(hd, fatStart + fatSectorForCurrentCluster + bpb->tableSize, fatBuffer, 512);
+        ATA_Flush(hd);
+
+        if (nextFileCluster == 0x0fffffff)
+            break;
+    }
 }
 
-void ChangeDirectory(DirectoryEntry* dir)
+DirectoryEntry** NewFile(char* name, uint8 attributes)
 {
-    uint32 fileCluster = ((uint32)dir->firstClusterHigh << 16) | dir->firstClusterLow;
-    uint32 fileSector = dataStart + bpb->sectorsPerCluster * (fileCluster - 2);
-
-    if (fileSector < rootStart)
-        fileSector = rootStart;
-
-    dirStart = fileSector;
+    return 0;
 }
 
 void PrintDirectoryContent()

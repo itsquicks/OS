@@ -17,7 +17,7 @@ void outw(uint16 port, uint16 val)
 	asm volatile ("outw %0, %1" : : "a"(val), "d"(port));
 }
 
-uint8 inw(uint16 port)
+uint16 inw(uint16 port)
 {
 	uint16 ret;
 	asm volatile ("inw %1, %0" : "=a"(ret) : "d"(port));

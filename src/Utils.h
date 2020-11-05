@@ -4,6 +4,7 @@
 
 uint16 strlen(const char* str);
 bool strcmp(const char* str1, const char* str2);
+bool strcmp(const char* str1, const char* str2, uint8 stop);
 void stradd(char* str1, const char* str2);
 void stradd(char* str, char chr);
 
@@ -24,10 +25,10 @@ const char* HexToString(short value);
 const char* HexToString(int value);
 const char* HexToString(long long value);
 
-extern const char* IntToString(uint8 value);
-extern const char* IntToString(uint16 value);
-extern const char* IntToString(uint32 value);
-extern const char* IntToString(uint64 value);
+const char* IntToString(uint8 value);
+const char* IntToString(uint16 value);
+const char* IntToString(uint32 value);
+const char* IntToString(uint64 value);
 const char* IntToString(char value);
 const char* IntToString(short value);
 const char* IntToString(int value);

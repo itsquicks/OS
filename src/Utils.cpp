@@ -28,7 +28,29 @@ bool strcmp(const char* str1, const char* str2)
 		_str2++;
 	}
 
-	if (*_str2 != 0)
+	if (*_str2 != *_str1)
+		return false;
+
+	return true;
+}
+
+bool strcmp(const char* str1, const char* str2, uint8 stop)
+{
+	const char* _str1 = str1;
+	const char* _str2 = str2;
+	uint8 i = 0;
+
+	while (*_str1 != 0 && i!=stop)
+	{
+		if (*_str1 != *_str2)
+			return false;
+
+		_str1++;
+		_str2++;
+		i++;
+	}
+
+	if (*_str2 != *_str1)
 		return false;
 
 	return true;

@@ -9,7 +9,7 @@
 #include "Devices/Keyboard.h"
 #include "Devices/ATA.h"
 
-//extern "C" void tripleFault();
+extern "C" void tripleFault();
 
 void EnterPressed()
 {
@@ -101,7 +101,7 @@ void EnterPressed()
 		}
 		else if (strcmp(argv[0], "cd") && argc == 2)
 		{
-		     DirectoryEntry* dir = (DirectoryEntry*)DirectoryFromName(argv[1]);
+		    DirectoryEntry* dir = (DirectoryEntry*)DirectoryFromName(argv[1]);
 
 			 if ((dir->attributes & 0x10) == 0x10 && dir != 0)
 			 {
@@ -136,11 +136,16 @@ void EnterPressed()
 
 			if (dir != 0)
 			{
-				DeleteFile(dir);
+				if ((dir->attributes & 0x10) == 0x10)
+				{
+					DeleteDirectory(dir);
+				}
+				else
+					DeleteFile(dir);
 			}
 			else
 			{
-				Print("Directory not found.", lightgrayF);
+				Print("Directory / File not found.", lightgrayF);
 				Print("\r\n");
 			}
 		}
@@ -176,24 +181,24 @@ void EnterPressed()
 		}
 		else if (strcmp(argv[0], "time") && argc == 1)
 		{
-			//Read_RTC();
+			Read_RTC();
 			PrintTime();
 			Print("\r\n");
 		}
 		else if (strcmp(argv[0], "date") && argc == 1)
 		{
-			//Read_RTC();
+			Read_RTC();
 			PrintDate();
 			Print("\r\n");
 		}
 		else if (strcmp(argv[0], "sleep") && argc == 2)
 		{
 			uint64 ms = StringToInt(argv[1]);
-			//Sleep(ms);
+			Sleep(ms);
 		}
 		else if (strcmp(argv[0], "restart") && argc == 1)
 		{
-			//tripleFault();
+			tripleFault();
 		}
 		else
 		{

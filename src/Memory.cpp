@@ -53,7 +53,7 @@ void PrintMemorySize()
 	Print("Memory size: ", lightgreenF); Print(IntToString(memSize)); Print(" bytes.");
 	Print("\r\n");
 	Print("Usable memory size: ", lightgreenF); Print(IntToString(usableMemSize));  Print(" bytes.   ");
-	Print(FloatToString(p, 2), yellowF); Print('%', yellowF);
+	Print(FloatToString(p, 2)); Print('%');
 }
 
 void PrintMemoryDump(uint64 address, uint8 rows)
