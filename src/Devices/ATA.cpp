@@ -21,13 +21,13 @@ ATA* InitializeATA(uint16 portBase, bool master)
 
 void ATA_Identify(ATA* ata)
 {
-	outb(ata->devicePort, ata->master ? 0xa0 : 0xb0);
+	outb(ata->devicePort, ata->master ? 0xa0 : 0xb0);	
 	outb(ata->controlPort, 0x00);
 
 	outb(ata->devicePort, 0xa0);
 	uint8 status = inb(ata->commandPort);
 
-	if (status == 0xFF)
+	if (status == 0xFF)	
 		return;
 
 	outb(ata->devicePort, ata->master ? 0xa0 : 0xb0);

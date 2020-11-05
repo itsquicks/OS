@@ -25,18 +25,9 @@ const char ScanCodeLookupTable[] =
 
 extern char* msg;
 extern uint16 cmdPos;
-extern uint16 selectStart;
-extern uint16 selectEnd;
-
-extern bool LeftShiftPressed;
-extern bool RightShiftPressed;
-extern bool caps;
-extern bool ctrl;
-extern bool selectMode;
-
 extern uint8 lastScanCode;
 
 extern void (*EnterHandler)();
-extern void ClearMessage();
-extern void KeyboardHandler(uint8 scanCode, uint8 chr);
-extern void DeleteSelection();
+void ClearMessage();
+void KeyboardHandler(uint8 scanCode, uint8 chr);
+void DeleteSelection();

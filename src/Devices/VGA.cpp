@@ -65,14 +65,26 @@ void ClearScreen(uint64 color)
 	}
 }
 
-void ClearScreen(uint16 start, uint16 length)
+void ClearScreen(uint16 start, uint16 length, uint16 color)
 {
+	uint16 value = 0;
+	value += color << 8;
 
+	for (uint16* i = (uint16*)(VGA_MEMORY + 2 * start); i < (uint16*)(VGA_MEMORY + 2 * (length + start)); i++)
+	{
+		*i = value;
+	}
 }
 
-void PaintScreen(uint16 startPos, uint16 length, uint64 color)
+void PaintScreen(uint16 start, uint16 length, uint16 color)
 {
-
+	for (uint16* i = (uint16*)(VGA_MEMORY + 2 * start); i < (uint16*)(VGA_MEMORY + 2 * (length + start)); i++)
+	{
+		uint16 value = *i;
+		value &= 0x00ff;
+		value += color << 8;
+		*i = value;
+	}
 }
 
 void Print(const char* str, uint8 color)
@@ -99,6 +111,10 @@ void Print(const char* str, uint8 color)
 
 void PrintBack(const char* str, uint8 color)
 {
+	uint8 len = strlen(str);
+	if (cursorPos >= len)
+		SetCursorPosition(cursorPos - len);
+
 	uint8* charPtr = (uint8*)str;
 
 	while (*charPtr != 0)

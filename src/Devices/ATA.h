@@ -7,14 +7,14 @@
 struct ATA
 {
 	uint16 dataPort;
-	uint8 errorPort;
-	uint8 sectorCountPort;
-	uint8 lbaLowPort;
-	uint8 lbaMidPort;
-	uint8 lbaHighPort;
-	uint8 devicePort;
-	uint8 commandPort;
-	uint8 controlPort;
+	uint16 errorPort;
+	uint16 sectorCountPort;
+	uint16 lbaLowPort;
+	uint16 lbaMidPort;
+	uint16 lbaHighPort;
+	uint16 devicePort;
+	uint16 commandPort;
+	uint16 controlPort;
 	uint16 bytePerSector;
 	bool master;
 };

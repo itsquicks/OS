@@ -1,6 +1,7 @@
 #pragma once
-#include "../IO.h"
 #include "../Typedefs.h"
+#include "../IO.h"
+#include "../Utils.h"
 
 #define blackF 0x00
 #define blueF 0X01
@@ -45,8 +46,8 @@ void SetCursorPosition(uint16 pos);
 void SetCursorPosition(uint8 x, uint8 y);
 void Scroll(uint64 color = whiteF);
 void ClearScreen(uint64 color = whiteF);
-void ClearScreen(uint16 start, uint16 length);
-void PaintScreen(uint16 startPos, uint16 length, uint64 color = whiteF);
+void ClearScreen(uint16 start, uint16 length, uint16 color = whiteF);
+void PaintScreen(uint16 start, uint16 length, uint16 color = whiteF);
 void Print(const char* str, uint8 color = whiteF);
 void PrintBack(const char* str, uint8 color = whiteF);
 void Print(uint8 value, uint8 color = whiteF, bool moveCursor = true);
