@@ -5,6 +5,7 @@
 uint16 strlen(const char* str);
 bool strcmp(const char* str1, const char* str2);
 bool strcmp(const char* str1, const char* str2, uint8 stop);
+void strcpy(char* str1, char* str2);
 void stradd(char* str1, const char* str2);
 void stradd(char* str, char chr);
 
@@ -15,6 +16,9 @@ void shiftdown(char* msg, uint8 index);
 
 uint64 StringToHex(const char* str);
 uint64 StringToInt(const char* str);
+
+uint64 HexAsInt(uint64 num);
+uint64 IntAsHex(uint64 num);
 
 const char* HexToString(uint8 value);
 const char* HexToString(uint16 value);

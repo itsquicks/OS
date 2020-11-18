@@ -12,15 +12,10 @@ struct MemorySegmentHeader
 	bool Free;
 };
 
-struct AlignedMemorySegmentHeader
-{
-	uint64 MemorySegmentHeaderAddress : 63;
-	bool isAligned : 1;
-};
+extern bool debug;
 
 void InitializeHeap(uint64 heapAddress, uint64 heapLength);
 void* calloc(uint64 size);
 void* realloc(void* address, uint64 newSize);
 void* malloc(uint64 size);
-void* aligned_alloc(uint64 alignment, uint64 size);
 void free(void* address);

@@ -5,6 +5,7 @@ MemoryMapEntry* UsableMemoryRegions[10];
 
 uint64 memSize;
 uint64 usableMemSize;
+uint64 allocatedMemSize;
 
 void PrintMemoryMap(MemoryMapEntry* memoryMap)
 {
@@ -47,13 +48,17 @@ MemoryMapEntry** GetUsableMemoryRegions()
 
 void PrintMemorySize()
 {
-	float p = usableMemSize / (float)memSize;
-	p *= 100;
+	float p_total = usableMemSize / (float)memSize;
+	p_total *= 100;
+	float p_usable = allocatedMemSize / (float)usableMemSize;
+	p_usable *= 100;
 
 	Print("Memory size: ", lightgreenF); Print(IntToString(memSize)); Print(" bytes.");
 	Print("\r\n");
 	Print("Usable memory size: ", lightgreenF); Print(IntToString(usableMemSize));  Print(" bytes.   ");
-	Print(FloatToString(p, 2)); Print('%');
+	Print(FloatToString(p_total, 2)); Print("%\n\r");
+	Print("Allocated memory size: ", lightgreenF); Print(IntToString(allocatedMemSize));  Print(" bytes.   ");
+	Print(FloatToString(p_usable, 2)); Print('%');
 }
 
 void PrintMemoryDump(uint64 address, uint8 rows)
@@ -62,7 +67,7 @@ void PrintMemoryDump(uint64 address, uint8 rows)
 
 	for (uint8 i = 0; i < rows; i++)
 	{
-		Print(HexToString((uint64)ptr), lightgreenF); Print("   ");
+		Print(HexToString((uint32)(uint64)ptr), lightgreenF); Print("   ");
 		for (uint8 n = 0; n < 16; n++)
 		{
 			Print(HexToString(*ptr)); Print(' ');

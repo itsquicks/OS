@@ -2,6 +2,8 @@
 
 MemorySegmentHeader* FirstFreeMemorySegment;
 
+bool debug = false;
+
 void InitializeHeap(uint64 heapAddress, uint64 heapLength)
 {
 	FirstFreeMemorySegment = (MemorySegmentHeader*)heapAddress;
@@ -20,25 +22,24 @@ void* calloc(uint64 size)
 	return mallocVal;
 }
 
-void* realloc(void* address, uint64 newSize)
-{
-	MemorySegmentHeader* oldSegmentHeader;
-	AlignedMemorySegmentHeader* amsh = (AlignedMemorySegmentHeader*)address - 1;
+void* realloc(void* ptr1, uint64 length) {
 
-	if (amsh->isAligned)
-		oldSegmentHeader = (MemorySegmentHeader*)(uint64)amsh->MemorySegmentHeaderAddress;
+	void* ptr2 = calloc(length);
+	uint64 new_ptr_length = 0;
+	MemorySegmentHeader* memSeg = (((MemorySegmentHeader*)ptr1) - 1);
+
+	if (!ptr2) return 0;
+
+	if (memSeg->MemoryLength > length)
+		new_ptr_length = length;
 	else
-		oldSegmentHeader = ((MemorySegmentHeader*)address) - 1;
+		new_ptr_length = memSeg->MemoryLength;
 
-	uint64 smallerSize = newSize;
-	if (oldSegmentHeader->MemoryLength < newSize) smallerSize = oldSegmentHeader->MemoryLength;
+	memcpy(ptr2, ptr1, new_ptr_length);
+	free(ptr1);
 
-	void* newMem = malloc(newSize);
-	memcpy(newMem, address, smallerSize);
-	free(address);
-	return newMem;
+	return ptr2;
 }
-
 void* malloc(uint64 size)
 {
 	uint64 remainder = size % 8;
@@ -49,6 +50,8 @@ void* malloc(uint64 size)
 
 	while (true)
 	{
+		Print(HexToString((uint64)currentMemorySegment),0x1d);
+		Print("\r\n");
 		if (currentMemorySegment->MemoryLength >= size)
 		{
 			if (currentMemorySegment->MemoryLength > size + sizeof(MemorySegmentHeader))
@@ -65,24 +68,36 @@ void* malloc(uint64 size)
 				currentMemorySegment->NextSegment = newSegmentHeader;
 				currentMemorySegment->MemoryLength = size;
 			}
+
 			if (currentMemorySegment == FirstFreeMemorySegment)
-			{
 				FirstFreeMemorySegment = currentMemorySegment->NextFreeSegment;
-			}
+
 			currentMemorySegment->Free = false;
-			currentMemorySegment->MemoryLength = size;
+
 			if (currentMemorySegment->PreviousFreeSegment != 0) currentMemorySegment->PreviousFreeSegment->NextFreeSegment = currentMemorySegment->NextFreeSegment;
 			if (currentMemorySegment->NextFreeSegment != 0) currentMemorySegment->NextFreeSegment->PreviousFreeSegment = currentMemorySegment->PreviousFreeSegment;
 			if (currentMemorySegment->PreviousSegment != 0) currentMemorySegment->PreviousSegment->NextFreeSegment = currentMemorySegment->NextFreeSegment;
 			if (currentMemorySegment->NextSegment != 0) currentMemorySegment->NextSegment->PreviousFreeSegment = currentMemorySegment->PreviousFreeSegment;
 
+			if (debug)
+			{
+				Print(IntToString(allocatedMemSize), 0x1f);
+				Print(" += ", 0x1a);
+				Print(IntToString(size), 0x1f);
+				Print(" -> ", 0x1f);
+				Print(HexToString((uint32)(uint64)(currentMemorySegment + 1)), 0x1f);
+				Print("   ",0x1f);
+
+				Print(IntToString(currentMemorySegment->MemoryLength),0x10 | yellowF);
+				Print("\r\n");
+			}
+
+			allocatedMemSize += currentMemorySegment->MemoryLength;
 			return currentMemorySegment + 1;
 		}
 
 		if (currentMemorySegment->NextFreeSegment == 0)
-		{
 			return 0;
-		}
 
 		currentMemorySegment = currentMemorySegment->NextFreeSegment;
 	}
@@ -94,6 +109,7 @@ void CombineFreeSegments(MemorySegmentHeader* a, MemorySegmentHeader* b)
 {
 	if (a == 0) return;
 	if (b == 0) return;
+	if (a == b) return;
 
 	if (a < b)
 	{
@@ -117,14 +133,22 @@ void CombineFreeSegments(MemorySegmentHeader* a, MemorySegmentHeader* b)
 
 void free(void* address)
 {
-	MemorySegmentHeader* currentMemorySegment;
-	AlignedMemorySegmentHeader* amsh = (AlignedMemorySegmentHeader*)address - 1;
+	MemorySegmentHeader* currentMemorySegment = ((MemorySegmentHeader*)address) - 1;
 
-	if (amsh->isAligned)
-		currentMemorySegment = (MemorySegmentHeader*)(uint64)amsh->MemorySegmentHeaderAddress;
-	else
-		currentMemorySegment = ((MemorySegmentHeader*)address) - 1;
+	if (debug)
+	{
+		Print(IntToString(allocatedMemSize),0x1f);
+		Print(" -= ", 0x1c);
+		Print(IntToString(currentMemorySegment->MemoryLength), 0x1f);
+		Print(" <- " ,0x1f);
+		Print(HexToString((uint32)(uint64)address), 0x1f);
+		Print("   ",0x1f);
 
+		Print(IntToString(currentMemorySegment->MemoryLength), 0x10 | yellowF);
+		Print("\r\n");
+	}
+
+	allocatedMemSize -= currentMemorySegment->MemoryLength;
 	currentMemorySegment->Free = true;
 
 	if (currentMemorySegment < FirstFreeMemorySegment) FirstFreeMemorySegment = currentMemorySegment;
@@ -142,40 +166,13 @@ void free(void* address)
 	if (currentMemorySegment->NextSegment != 0)
 	{
 		currentMemorySegment->NextSegment->PreviousSegment = currentMemorySegment;
+		currentMemorySegment->NextSegment->PreviousFreeSegment = currentMemorySegment;
 		if (currentMemorySegment->NextSegment->Free) CombineFreeSegments(currentMemorySegment, currentMemorySegment->NextSegment);
 	}
 	if (currentMemorySegment->PreviousSegment != 0)
 	{
 		currentMemorySegment->PreviousSegment->NextSegment = currentMemorySegment;
+		currentMemorySegment->PreviousSegment->NextFreeSegment = currentMemorySegment;
 		if (currentMemorySegment->PreviousSegment->Free) CombineFreeSegments(currentMemorySegment, currentMemorySegment->PreviousSegment);
 	}
-}
-
-void* aligned_alloc(uint64 alignment, uint64 size)
-{
-	uint64 alignmentRemainder = alignment % 8;
-	alignment -= alignmentRemainder;
-	if (alignmentRemainder != 0) alignment += 8;
-
-	uint64 sizeRemainder = size % 8;
-	size -= sizeRemainder;
-	if (sizeRemainder != 0) size += 8;
-
-	uint64 fullSize = size + alignment;
-
-	void* mallocVal = malloc(fullSize);
-	uint64 address = (uint64)mallocVal;
-
-	uint64 remainder = address % alignment;
-	address -= remainder;
-	if (remainder != 0)
-	{
-		address += alignment;
-
-		AlignedMemorySegmentHeader* amsh = (AlignedMemorySegmentHeader*)address - 1;
-		amsh->isAligned = true;
-		amsh->MemorySegmentHeaderAddress = (uint64)mallocVal - sizeof(MemorySegmentHeader);
-	}
-
-	return (void*)address;
 }

@@ -2,6 +2,7 @@
 #include "Typedefs.h"
 #include "IO.h"
 #include "Time.h"
+#include "Syscalls.h"
 #include "Devices/VGA.h"
 #include "Devices/Keyboard.h"
 #include "Devices/PIC.h"
@@ -18,4 +19,5 @@ struct IDT64
 };
 
 extern void (*MainKeyboardHandler)(uint8 scanCode, uint8 chr);
+void SetIDT(uint64 isr, uint8 num);
 void InitializeIDT();

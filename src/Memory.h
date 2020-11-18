@@ -16,6 +16,7 @@ extern uint8 UsableMemoryRegionCount;
 
 extern uint64 memSize;
 extern uint64 usableMemSize;
+extern uint64 allocatedMemSize;
 
 MemoryMapEntry** GetUsableMemoryRegions();
 void PrintMemoryMap(MemoryMapEntry* memoryMap);

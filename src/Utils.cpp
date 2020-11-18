@@ -56,6 +56,17 @@ bool strcmp(const char* str1, const char* str2, uint8 stop)
 	return true;
 }
 
+void strcpy(char* str1, char* str2)
+{
+	uint8 i = 0;
+	while (*(str2+i) != 0)
+	{
+		*(str1 + i) = *(str2 + i);
+		i++;
+	}
+	*(str1 + i) = 0;
+}
+
 void stradd(char* str1, const char* str2)
 {
 	uint8 len = strlen(str1);
@@ -115,7 +126,7 @@ char** splitwords(const char* msg, uint8 words)
 	char** argv = (char**)calloc(words * sizeof(char*));
 	for (uint8 i = 0; i < words; i++)
 	{
-		argv[i] = (char*)calloc(33 * sizeof(char));
+		argv[i] = (char*)calloc(32 * sizeof(char));
 	}
 
 	char* ptr = (char*)msg;
@@ -156,7 +167,7 @@ char** splitwords(const char* msg, uint8 words)
 			continue;
 		}
 
-		if (j < 32)
+		if (j < 31)
 		{
 			*(argv[i] + j) = *ptr;
 			j++;
@@ -232,6 +243,36 @@ uint64 StringToInt(const char* str)
 	}
 
 	ret = ret / 10;
+	return ret;
+}
+
+uint64 HexAsInt(uint64 num)
+{
+	uint64 ret = 0;
+	uint8 i = 1;
+
+	while (num != 0)
+	{
+		ret += (num % 16) * i;
+		i *= 10;
+		num /= 16;
+	}
+
+	return ret;
+}
+
+uint64 IntAsHex(uint64 num)
+{
+	uint64 ret = 0;
+	uint8 i = 0;
+
+	while (num != 0)
+	{
+		ret += ((num % 10) << (4 * i));
+		i++;
+		num /= 10;
+	}
+
 	return ret;
 }
 

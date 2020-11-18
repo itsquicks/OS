@@ -4,11 +4,16 @@ uint64 irq0_count;
 
 void PrintTime()
 {
-	Print(HexToString(hour), lightcyanF);
+	Print(IntToString(ampmhour), lightcyanF);
 	Print(':', lightcyanF);
 	Print(HexToString(minute), lightcyanF);
 	Print(':', lightcyanF);
 	Print(HexToString(second), lightcyanF);
+	Print(' ');
+	if (pm)
+		Print("PM", lightcyanF);
+	else
+		Print("AM", lightcyanF);
 }
 
 void PrintDate()

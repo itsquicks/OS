@@ -20,156 +20,47 @@ extern uint64 isr16;
 extern uint64 isr17;
 extern uint64 isr18;
 extern uint64 isr19;
+extern uint64 isr60;
+extern uint64 isr61;
 
 extern "C" void LoadIDT();
 
 void (*MainKeyboardHandler)(uint8 scanCode, uint8 chr);
 
+void SetIDT(uint64 isr, uint8 num)
+{
+	_idt[num].zero = 0;
+	_idt[num].offset_low = (uint16)(isr & 0x000000000000ffff);
+	_idt[num].offset_mid = (uint16)((isr & 0x00000000ffff0000) >> 16);
+	_idt[num].offset_high = (uint32)((isr & 0xffffffff00000000) >> 32);
+	_idt[num].ist = 0;
+	_idt[num].selector = 0x08;
+	_idt[num].types_attr = 0x8e;
+}
+
 void InitializeIDT()
 {
-	_idt[0].zero = 0;
-	_idt[0].offset_low = (uint16)(((uint64)&isr0 & 0x000000000000ffff));
-	_idt[0].offset_mid = (uint16)(((uint64)&isr0 & 0x00000000ffff0000) >> 16);
-	_idt[0].offset_high = (uint32)(((uint64)&isr0 & 0xffffffff00000000) >> 32);
-	_idt[0].ist = 0;
-	_idt[0].selector = 0x08;
-	_idt[0].types_attr = 0x8e;
+	SetIDT((uint64)&isr0, 0);
+	SetIDT((uint64)&isr1, 1);
+	SetIDT((uint64)&isr3, 3);
+	SetIDT((uint64)&isr4, 4);
+	SetIDT((uint64)&isr5, 5);
+	SetIDT((uint64)&isr6, 6);
+	SetIDT((uint64)&isr7, 7);
+	SetIDT((uint64)&isr8, 8);
+	SetIDT((uint64)&isr9, 9);
+	SetIDT((uint64)&isr10, 10);
+	SetIDT((uint64)&isr11, 11);
+	SetIDT((uint64)&isr12, 12);
+	SetIDT((uint64)&isr13, 13);
+	SetIDT((uint64)&isr14, 14);
+	SetIDT((uint64)&isr16, 16);
+	SetIDT((uint64)&isr17, 17);
+	SetIDT((uint64)&isr18, 18);
+	SetIDT((uint64)&isr19, 19);
 
-	_idt[1].zero = 0;
-	_idt[1].offset_low = (uint16)(((uint64)&isr1 & 0x000000000000ffff));
-	_idt[1].offset_mid = (uint16)(((uint64)&isr1 & 0x00000000ffff0000) >> 16);
-	_idt[1].offset_high = (uint32)(((uint64)&isr1 & 0xffffffff00000000) >> 32);
-	_idt[1].ist = 0;
-	_idt[1].selector = 0x08;
-	_idt[1].types_attr = 0x8e;
-
-	_idt[3].zero = 0;
-	_idt[3].offset_low = (uint16)(((uint64)&isr3 & 0x000000000000ffff));
-	_idt[3].offset_mid = (uint16)(((uint64)&isr3 & 0x00000000ffff0000) >> 16);
-	_idt[3].offset_high = (uint32)(((uint64)&isr3 & 0xffffffff00000000) >> 32);
-	_idt[3].ist = 0;
-	_idt[3].selector = 0x08;
-	_idt[3].types_attr = 0x8e;
-
-	_idt[4].zero = 0;
-	_idt[4].offset_low = (uint16)(((uint64)&isr4 & 0x000000000000ffff));
-	_idt[4].offset_mid = (uint16)(((uint64)&isr4 & 0x00000000ffff0000) >> 16);
-	_idt[4].offset_high = (uint32)(((uint64)&isr4 & 0xffffffff00000000) >> 32);
-	_idt[4].ist = 0;
-	_idt[4].selector = 0x08;
-	_idt[4].types_attr = 0x8e;
-
-	_idt[5].zero = 0;
-	_idt[5].offset_low = (uint16)(((uint64)&isr5 & 0x000000000000ffff));
-	_idt[5].offset_mid = (uint16)(((uint64)&isr5 & 0x00000000ffff0000) >> 16);
-	_idt[5].offset_high = (uint32)(((uint64)&isr5 & 0xffffffff00000000) >> 32);
-	_idt[5].ist = 0;
-	_idt[5].selector = 0x08;
-	_idt[5].types_attr = 0x8e;
-
-	_idt[6].zero = 0;
-	_idt[6].offset_low = (uint16)(((uint64)&isr6 & 0x000000000000ffff));
-	_idt[6].offset_mid = (uint16)(((uint64)&isr6 & 0x00000000ffff0000) >> 16);
-	_idt[6].offset_high = (uint32)(((uint64)&isr6 & 0xffffffff00000000) >> 32);
-	_idt[6].ist = 0;
-	_idt[6].selector = 0x08;
-	_idt[6].types_attr = 0x8e;
-
-	_idt[7].zero = 0;
-	_idt[7].offset_low = (uint16)(((uint64)&isr7 & 0x000000000000ffff));
-	_idt[7].offset_mid = (uint16)(((uint64)&isr7 & 0x00000000ffff0000) >> 16);
-	_idt[7].offset_high = (uint32)(((uint64)&isr7 & 0xffffffff00000000) >> 32);
-	_idt[7].ist = 0;
-	_idt[7].selector = 0x08;
-	_idt[7].types_attr = 0x8e;
-
-	_idt[8].zero = 0;
-	_idt[8].offset_low = (uint16)(((uint64)&isr8 & 0x000000000000ffff));
-	_idt[8].offset_mid = (uint16)(((uint64)&isr8 & 0x00000000ffff0000) >> 16);
-	_idt[8].offset_high = (uint32)(((uint64)&isr8 & 0xffffffff00000000) >> 32);
-	_idt[8].ist = 0;
-	_idt[8].selector = 0x08;
-	_idt[8].types_attr = 0x8e;
-
-	_idt[9].zero = 0;
-	_idt[9].offset_low = (uint16)(((uint64)&isr9 & 0x000000000000ffff));
-	_idt[9].offset_mid = (uint16)(((uint64)&isr9 & 0x00000000ffff0000) >> 16);
-	_idt[9].offset_high = (uint32)(((uint64)&isr9 & 0xffffffff00000000) >> 32);
-	_idt[9].ist = 0;
-	_idt[9].selector = 0x08;
-	_idt[9].types_attr = 0x8e;
-
-	_idt[10].zero = 0;
-	_idt[10].offset_low = (uint16)(((uint64)&isr10 & 0x000000000000ffff));
-	_idt[10].offset_mid = (uint16)(((uint64)&isr10 & 0x00000000ffff0000) >> 16);
-	_idt[10].offset_high = (uint32)(((uint64)&isr10 & 0xffffffff00000000) >> 32);
-	_idt[10].ist = 0;
-	_idt[10].selector = 0x08;
-	_idt[10].types_attr = 0x8e;
-
-	_idt[11].zero = 0;
-	_idt[11].offset_low = (uint16)(((uint64)&isr11 & 0x000000000000ffff));
-	_idt[11].offset_mid = (uint16)(((uint64)&isr11 & 0x00000000ffff0000) >> 16);
-	_idt[11].offset_high = (uint32)(((uint64)&isr11 & 0xffffffff00000000) >> 32);
-	_idt[11].ist = 0;
-	_idt[11].selector = 0x08;
-	_idt[11].types_attr = 0x8e;
-
-	_idt[12].zero = 0;
-	_idt[12].offset_low = (uint16)(((uint64)&isr12 & 0x000000000000ffff));
-	_idt[12].offset_mid = (uint16)(((uint64)&isr12 & 0x00000000ffff0000) >> 16);
-	_idt[12].offset_high = (uint32)(((uint64)&isr12 & 0xffffffff00000000) >> 32);
-	_idt[12].ist = 0;
-	_idt[12].selector = 0x08;
-	_idt[12].types_attr = 0x8e;
-
-	_idt[13].zero = 0;
-	_idt[13].offset_low = (uint16)(((uint64)&isr13 & 0x000000000000ffff));
-	_idt[13].offset_mid = (uint16)(((uint64)&isr13 & 0x00000000ffff0000) >> 16);
-	_idt[13].offset_high = (uint32)(((uint64)&isr13 & 0xffffffff00000000) >> 32);
-	_idt[13].ist = 0;
-	_idt[13].selector = 0x08;
-	_idt[13].types_attr = 0x8e;
-
-	_idt[14].zero = 0;
-	_idt[14].offset_low = (uint16)(((uint64)&isr14 & 0x000000000000ffff));
-	_idt[14].offset_mid = (uint16)(((uint64)&isr14 & 0x00000000ffff0000) >> 16);
-	_idt[14].offset_high = (uint32)(((uint64)&isr14 & 0xffffffff00000000) >> 32);
-	_idt[14].ist = 0;
-	_idt[14].selector = 0x08;
-	_idt[14].types_attr = 0x8e;
-
-	_idt[16].zero = 0;
-	_idt[16].offset_low = (uint16)(((uint64)&isr16 & 0x000000000000ffff));
-	_idt[16].offset_mid = (uint16)(((uint64)&isr16 & 0x00000000ffff0000) >> 16);
-	_idt[16].offset_high = (uint32)(((uint64)&isr16 & 0xffffffff00000000) >> 32);
-	_idt[16].ist = 0;
-	_idt[16].selector = 0x08;
-	_idt[16].types_attr = 0x8e;
-
-	_idt[17].zero = 0;
-	_idt[17].offset_low = (uint16)(((uint64)&isr17 & 0x000000000000ffff));
-	_idt[17].offset_mid = (uint16)(((uint64)&isr17 & 0x00000000ffff0000) >> 16);
-	_idt[17].offset_high = (uint32)(((uint64)&isr17 & 0xffffffff00000000) >> 32);
-	_idt[17].ist = 0;
-	_idt[17].selector = 0x08;
-	_idt[17].types_attr = 0x8e;
-
-	_idt[18].zero = 0;
-	_idt[18].offset_low = (uint16)(((uint64)&isr18 & 0x000000000000ffff));
-	_idt[18].offset_mid = (uint16)(((uint64)&isr18 & 0x00000000ffff0000) >> 16);
-	_idt[18].offset_high = (uint32)(((uint64)&isr18 & 0xffffffff00000000) >> 32);
-	_idt[18].ist = 0;
-	_idt[18].selector = 0x08;
-	_idt[18].types_attr = 0x8e;
-
-	_idt[19].zero = 0;
-	_idt[19].offset_low = (uint16)(((uint64)&isr19 & 0x000000000000ffff));
-	_idt[19].offset_mid = (uint16)(((uint64)&isr19 & 0x00000000ffff0000) >> 16);
-	_idt[19].offset_high = (uint32)(((uint64)&isr19 & 0xffffffff00000000) >> 32);
-	_idt[19].ist = 0;
-	_idt[19].selector = 0x08;
-	_idt[19].types_attr = 0x8e;
+	SetIDT((uint64)&isr60, 60);
+	SetIDT((uint64)&isr61, 61);
 
 	RemapPIC();
 	SetMaskPIC1(0b11111101);
@@ -204,6 +95,8 @@ extern "C" void isr0_handler()
 		asm("hlt");
 	}
 }
+
+uint8 ind = 0;
 
 extern "C" void isr1_handler()
 {
@@ -411,4 +304,16 @@ extern "C" void isr19_handler(void) {
 	SendEOI(19);
 
 	asm("hlt");
+}
+
+extern "C" void isr60_handler(void) {
+
+	syscall_vga();
+	SendEOI(60);	
+}
+
+extern "C" void isr61_handler(void) {
+
+	
+	SendEOI(61);
 }

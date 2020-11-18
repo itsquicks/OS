@@ -4,6 +4,7 @@
 #include "Utils.h"
 #include "Devices/ATA.h"
 #include "Devices/VGA.h"
+#include "Devices/CMOS.h"
 
 struct PartitionTableEntry
 {
@@ -91,23 +92,35 @@ extern uint32 rootStart;
 extern uint32 dirStart;
 extern char* path;
 
+extern DirectoryEntry* entries;
+extern uint8 entriesCount;
+
 MBR* ReadMBR();
 BPB* ReadBPB(uint32 partitionOffset);
 
 void InitializeFilesystem();
+void ReadEntries();
+void WriteEntries();
 
-char* GetLongFileName(DirectoryEntry* dir);
-char* GetFileName(DirectoryEntry* dir);
+char* GetLongFileName(uint8 index);
+char* GetFileName(DirectoryEntry dir);
 DirectoryEntry* DirectoryFromName(char* name);
+bool DOSNameFromString(char* str, uint8* name, uint8* ext, uint8& reserved);
+void Print_cTime(DirectoryEntry dir, uint8 color = whiteF);
+void Print_cDate(DirectoryEntry dir, uint8 color = whiteF);
 
 uint32 GetFreeCluster();
+void SetFAT(uint32 cluster, uint32 value);
 
-void ChangeDirectory(DirectoryEntry* dir);
-void DeleteDirectory(DirectoryEntry* dir);
-void DeleteFile(DirectoryEntry* file);
-DirectoryEntry** NewFile(char* name, uint8 attributes);
+void ChangeDirectory(DirectoryEntry dir);
+void DeleteDirectory(DirectoryEntry dir);
+void DeleteFile(DirectoryEntry file, bool withContent = true);
+void NewFile(char* name, uint8 attributes);
+void RenameFile(DirectoryEntry file, char* newName);
+void LoadFile(DirectoryEntry file, uint64 address);
+void SaveFile(DirectoryEntry file, uint64 address, uint32 newSize);
 
 void PrintDirectoryContent();
-void PrintFileContent(DirectoryEntry* file);
+void PrintFileContent(DirectoryEntry file);
 void PrintMBR(MBR* mbr);
 void PrintBPB(BPB* bpb);
