@@ -41,6 +41,8 @@ pop rax
 [extern isr17_handler]
 [extern isr18_handler]
 [extern isr19_handler]
+[extern isr60_handler]
+[extern isr61_handler]
 
 isr0:
 PUSHALL
@@ -167,6 +169,20 @@ call isr19_handler
 POPALL
 iretq
 GLOBAL isr19
+
+isr60:
+PUSHALL
+call isr60_handler
+POPALL
+iretq
+GLOBAL isr60
+
+isr61:
+PUSHALL
+call isr61_handler
+POPALL
+iretq
+GLOBAL isr61
 
 LoadIDT:
 lidt[idtDescriptor]
