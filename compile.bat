@@ -11,22 +11,6 @@ copy /b bootloader.bin+Kernel.bin os.bin
 dd if=/dev/zero of=os.img bs=512 count=128
 dd if=os.bin of=os.img conv=notrunc
 
-del os.bin
-del Kernel.bin
-del bootloader.bin
-del Makefile
-del libkernel.a
-del ExtendedProgram.o
-del cmake_install.cmake
-del CMakeCache.txt
-
-cd CMakeFiles
-del /F/Q/S *.* > NUL
-cd ..
-rmdir /Q/S CMakeFiles
-
-cd Desktop
-cd ProjectOS
 qemu-system-x86_64 -hda os.img -hdb hd.iso
 
 pause
