@@ -24,10 +24,12 @@ const char ScanCodeLookupTable[] =
 };
 
 extern char* msg;
+extern char** history;
 extern uint16 cmdPos;
 extern uint8 lastScanCode;
 
 extern void (*EnterHandler)();
+void InitializeInput();
 void ClearMessage();
 void KeyboardHandler(uint8 scanCode, uint8 chr);
 void DeleteSelection();

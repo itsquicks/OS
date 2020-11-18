@@ -6,6 +6,8 @@ uint8 hour;
 uint8 day;
 uint8 month;
 uint8 year;
+uint8 ampmhour;
+uint8 pm;
 
 uint8 GetUpdateFlag() 
 {
@@ -61,4 +63,21 @@ void Read_RTC() {
         (last_day != day) ||
         (last_month != month) ||
         (last_year != year));
+
+    hour = HexAsInt(hour);
+
+    hour += 2;
+    if (hour > 24)
+        hour -= 24;
+
+    if (hour > 12)
+        pm = true;
+    else
+        pm = false;
+
+    ampmhour = hour;
+    if (ampmhour > 12)
+        ampmhour -= 12;
+
+    hour = IntAsHex(hour);
 }

@@ -6,24 +6,24 @@
 #define blackF 0x00
 #define blueF 0X01
 #define greenF 0x02
-#define cyanF 0X03
+#define cyanF 0x03
 #define redF 0x04
 #define magentaF 0x05
 #define brownF 0x06
 #define lightgrayF 0x07
 #define darkgrayF 0x08
-#define lightblueF 0X09
+#define lightblueF 0x09
 #define lightgreenF 0x0a
-#define lightcyanF 0X0b
+#define lightcyanF 0x0b
 #define lightredF 0x0c
-#define lightmagentaF 0X0d
+#define lightmagentaF 0x0d
 #define yellowF 0x0e
 #define whiteF 0x0f
 
 #define blackB 0x00
-#define blueB 0X10
+#define blueB 0x10
 #define greenB 0x20
-#define cyanB 0X30
+#define cyanB 0x30
 #define redB 0x40
 #define magentaB 0x50
 #define brownB 0x60
@@ -47,7 +47,8 @@ void SetCursorPosition(uint8 x, uint8 y);
 void Scroll(uint64 color = whiteF);
 void ClearScreen(uint64 color = whiteF);
 void ClearScreen(uint16 start, uint16 length, uint16 color = whiteF);
-void PaintScreen(uint16 start, uint16 length, uint16 color = whiteF);
+void PaintScreen(uint64 color);
+void PaintScreen(uint16 start, uint16 length, uint16 color);
 void Print(const char* str, uint8 color = whiteF);
 void PrintBack(const char* str, uint8 color = whiteF);
 void Print(uint8 value, uint8 color = whiteF, bool moveCursor = true);

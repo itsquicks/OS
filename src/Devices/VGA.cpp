@@ -76,6 +76,20 @@ void ClearScreen(uint16 start, uint16 length, uint16 color)
 	}
 }
 
+void PaintScreen(uint64 color)
+{
+	for (uint64* i = (uint64*)VGA_MEMORY; i < (uint64*)(VGA_MEMORY + 4000); i++)
+	{
+		uint64 value = *i;
+		value &= 0x00ff00ff00ff00ff;
+		value += color << 8;
+		value += color << 24;
+		value += color << 40;
+		value += color << 56;
+		*i = value;
+	}
+}
+
 void PaintScreen(uint16 start, uint16 length, uint16 color)
 {
 	for (uint16* i = (uint16*)(VGA_MEMORY + 2 * start); i < (uint16*)(VGA_MEMORY + 2 * (length + start)); i++)

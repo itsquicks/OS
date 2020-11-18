@@ -1,7 +1,13 @@
 #include "CPU.h"
 
-uint32* cpu_name = (uint32*)calloc(48);
-uint64 cpu_speed = 0;
+uint32* cpu_name;
+uint64 cpu_speed;
+
+void InitializeCPUID()
+{
+	cpu_name = (uint32*)calloc(48);
+	cpu_speed = 0;
+}
 
 void CPUID(uint32 code, uint32& eax, uint32& ebx, uint32& ecx, uint32& edx)
 {

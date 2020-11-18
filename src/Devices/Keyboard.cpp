@@ -1,10 +1,13 @@
 #include "Keyboard.h"
 
-char* msg = (char*)calloc(256 + 1);
-uint8 i = 0;
-uint16 cmdPos = 0;
-uint16 selectStart = 0;
-uint16 selectEnd = 0;
+char* msg;
+char** history;
+uint8 i;
+uint8 h;
+uint8 count;
+uint16 cmdPos;
+uint16 selectStart;
+uint16 selectEnd;
 
 bool LeftShiftPressed = false;
 bool RightShiftPressed = false;
@@ -16,10 +19,40 @@ uint8 lastScanCode;
 
 void (*EnterHandler)();
 
+void InitializeInput()
+{
+	msg = (char*)calloc(256);
+
+	history = (char**)calloc(5 * sizeof(char*));
+	for (uint8 j = 0; j < 5; j++)
+		history[j] = (char*)calloc(256);
+
+	i = 0;
+	h = 0;
+	count = 0;
+	
+	cmdPos = 0;
+	selectStart = 0;
+	selectEnd = 0;
+}
+
 void ClearMessage()
 {
+	if (*msg != 0)
+	{
+		for (uint8 j = 4; j > 0; j--)
+		{
+			strcpy(history[j], history[j - 1]);
+		}
+		strcpy(history[0], msg);
+
+		if (count < 5)
+			count++;
+	}
+
 	*msg = 0;
 	i = 0;
+	h = 0;
 }
 
 void KeyboardHandler(uint8 scanCode, uint8 chr)
@@ -116,7 +149,7 @@ void KeyboardHandler(uint8 scanCode, uint8 chr)
 			if (selectMode)
 				DeleteSelection();
 
-			if (i < 255)
+			if (i < 254)
 			{
 				shiftup(msg, cursorPos - cmdPos - 1, chr);
 				if (cursorPos + 1 > 1999)
@@ -165,12 +198,26 @@ void KeyboardHandler(uint8 scanCode, uint8 chr)
 				EnterHandler();
 				return;
 				break;
-				/*case 0x48:                                 //Up arrow
-					shiftup(msg, cursorPos - cmdPos - 1);
-					break;
-				case 0x50:                                 //Down arrow
-					shiftdown(msg, cursorPos - cmdPos - 2);
-					break;*/
+			case 0x48:                                 //Up arrow
+				if (h + 1 <= count)
+				{
+					h += 1;
+					selectMode = false;
+					strcpy(msg, history[h - 1]);
+					i = strlen(msg);
+					SetCursorPosition(cmdPos + i + 1);
+				}
+				break;
+			case 0x50:                                 //Down arrow
+				if (h > 1)
+				{
+				    h--;
+					selectMode = false;
+					strcpy(msg, history[h - 1]);
+					i = strlen(msg);
+					SetCursorPosition(cmdPos + i + 1);
+				}
+				break;
 			case 0x4b:                                 //Left arrow
 				if ((LeftShiftPressed || RightShiftPressed) && !selectMode)
 				{
